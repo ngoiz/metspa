@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "metspa"
+version = "0.0a"
+description = "A meteorological report generating app"
+authors = ["Norberto Goizueta <ng213@ic.ac.uk>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^1.5.2"
+pytest = "^7.2.0"
+PyYAML = "^6.0"
+python-dotenv = "^0.21.0"
+pre-commit = "^2.20.0"
+requests = "^2.28.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
