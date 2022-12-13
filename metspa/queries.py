@@ -16,7 +16,7 @@ class DataRequest:
 
     def get_from_api(self):
         api = AEMETInterface()
-
+        self.logger.info(f"Calling AEMET API at {self.endpoint}")
         msg = api.get_api_msg(self.endpoint)
 
         return msg
@@ -38,7 +38,7 @@ class DataRequest:
 
     @property
     def filename(self):
-        return self.outdir / f"{self.query_name}.txt"
+        return self.outdir / f"{self.query_name}.json"
 
     @property
     def outdir(self):

@@ -13,6 +13,9 @@ class AEMETInterface:
     ROUTE = "https://opendata.aemet.es/opendata/"
     API_KEY = read_environment_variable(aemet_api_key_name)
 
+    def __init__(self) -> None:
+        self.logger = logging.getLogger("interface")
+
     # TODO Note to me
     # make a generic api call function and add as args the desired endpoint and message
 
@@ -25,10 +28,9 @@ class AEMETInterface:
         query_params["api_key"] = self.API_KEY
 
         try:
-            logging.info("Calling AEMET OPENDATA")
+            self.logger.info("Calling AEMET OPENDATA")
             response = requests.get(query_endpoint, params=query_params, timeout=360)
-            logging.info("Successfully read API")
-            response.raise_for_status()
+            self.logger.info(f"Successfully read API - STATUS {response.status_code}")
         except HTTPError as http_err:
             logging.exception(http_err)
             print(f"HTTP error occurred: {http_err}")
@@ -43,6 +45,14 @@ class AEMETInterface:
             str: HTTP response data
         """
         api_msg = self._call_api(endpoint, query_params)
-        http_msg = urllib.request.urlopen(api_msg["datos"])
 
-        return http_msg.read().decode("UTF-8").strip("[]")
+        try:
+            api_data = api_msg["datos"]
+        except KeyError:
+            error_msg = f'Error - STATUS {api_msg["estado"]} - {api_msg["descripcion"]}'
+            self.logger.error(error_msg)
+            raise HTTPError
+        else:
+            http_msg = urllib.request.urlopen(api_data)
+
+        return http_msg.read().decode("UTF-8")
