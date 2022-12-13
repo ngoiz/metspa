@@ -12,6 +12,7 @@ def station_id():
     return 3196
 
 
+@pytest.mark.skip("Api call")
 def test_api_msg(station_id):
     test_dir = PACKAGE_DIRECTORY / "temp"
     os.makedirs(test_dir, exist_ok=True)
@@ -23,5 +24,5 @@ def test_api_msg(station_id):
         )
     )
 
-    with open(test_dir / "test_api_msg.json", "wb") as f:
+    with open(test_dir / "test_api_msg.json", "w") as f:
         f.write(msg)

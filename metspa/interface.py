@@ -45,4 +45,4 @@ class AEMETInterface:
         api_msg = self._call_api(endpoint, query_params)
         http_msg = urllib.request.urlopen(api_msg["datos"])
 
-        return http_msg.read()
+        return http_msg.read().decode("UTF-8").strip("[]")
