@@ -1,6 +1,8 @@
-from pathlib import Path
 import os
+from pathlib import Path
+
 from dotenv import load_dotenv
+
 import metspa.exceptions as exceptions
 
 load_dotenv()
