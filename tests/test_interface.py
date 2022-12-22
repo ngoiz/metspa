@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import pytest
 
@@ -12,10 +13,16 @@ def station_id():
     return 3196
 
 
-@pytest.mark.skip("Api call")
-def test_api_msg(station_id):
+@pytest.fixture(scope="module")
+def test_directory():
     test_dir = PACKAGE_DIRECTORY / "temp"
     os.makedirs(test_dir, exist_ok=True)
+    yield test_dir
+    shutil.rmtree(test_dir)
+
+
+@pytest.mark.skip("Api call")
+def test_api_msg(station_id, test_directory):
 
     msg = AEMETInterface().get_api_msg(
         endpoint=(
@@ -24,5 +31,5 @@ def test_api_msg(station_id):
         )
     )
 
-    with open(test_dir / "test_api_msg.json", "w") as f:
+    with open(test_directory / "test_api_msg.json", "w") as f:
         f.write(msg)
