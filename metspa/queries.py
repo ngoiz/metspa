@@ -21,7 +21,13 @@ class DataRequest:
 
         return msg
 
-    def run(self, refresh_from_api=False):
+    def run(self, refresh_from_api: bool = False) -> str:
+        """
+        Returns JSON formatted string data and saves it to file
+
+        Args:
+            refresh_from_api (bool)
+        """
         if self.filename.exists() and not refresh_from_api:
             self.logger.info("Loading file from file")
             return self.load_from_file()
@@ -48,6 +54,8 @@ class DataRequest:
     def outdir(self, path):
         if path is None:
             self._outdir = PACKAGE_DIRECTORY / "output"
+        else:
+            self._outdir = path
 
     def save(self, msg):
         if not self.outdir.is_dir():
@@ -95,7 +103,7 @@ class DailyDataRequest(DataRequest):
     )
 
     def __init__(
-        self, start_date: str, end_date: str, station_id: int, outdir=None
+        self, start_date: str, end_date: str, station_id: str, outdir=None
     ) -> None:
         super().__init__()
 
