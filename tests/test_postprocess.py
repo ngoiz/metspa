@@ -23,7 +23,7 @@ def df():
 
     raw_df = pd.read_json(json_data)
 
-    return DailyDataProcess().tweak_data(raw_df)
+    return DailyDataProcess.tweak_data(raw_df)
 
 
 def test_daily_numeric_column_processing(df: pd.DataFrame):
