@@ -1,15 +1,11 @@
-from setuptools import setup, find_packages
-import re
-import os
+from setuptools import find_packages, setup
 
 setup(
-    name='metspa',
+    name="metspa",
     packages=find_packages(
-        where='./',
-        include=['metspa*'],
-        exclude=['tests'],
+        where="./",
+        include=["metspa*"],
+        exclude=["tests"],
     ),
-    entry_points={
-        'console_scripts': ['metspa=metspa.main:main']
-    }
+    entry_points={"console_scripts": ["metspa=metspa.main:main"]},
 )
