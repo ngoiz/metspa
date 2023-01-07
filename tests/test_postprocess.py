@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from metspa.postprocess import DailyDataProcess
+from metspa.postprocess import DailyDataProcess, MonthlyReport
 from metspa.queries import DailyDataRequest
 from metspa.utils import PACKAGE_DIRECTORY
 
@@ -35,3 +35,13 @@ def test_daily_numeric_column_processing(df: pd.DataFrame):
     assert (
         len(unformated_columns) == 0
     ), f"Some columns were not properly formatted {unformated_columns}"
+
+
+def test_monthly_report(df):
+    monthly_report = MonthlyReport.create_from_daily_data(df)
+
+    mr_formatted = monthly_report.rename_columns()
+
+    assert len(monthly_report.columns) == len(
+        mr_formatted.columns
+    ), "Columns not properly formatted. Changed number of columns."

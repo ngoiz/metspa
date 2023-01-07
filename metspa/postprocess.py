@@ -1,7 +1,27 @@
 # Should replace processdata.py in the future
+from dataclasses import dataclass
+from typing import Self
 
 import pandas as pd
-from dataclasses import dataclass
+
+
+@dataclass
+class Column:
+    short_name: str
+    long_name: str
+
+
+@dataclass
+class MonthlyReportColumn(Column):
+    aggfunc_name: str
+    parent_column: str
+
+    @property
+    def aggfunc(self):
+        if self.parent_column and self.aggfunc_name:
+            return pd.NamedAgg(column=self.parent_column, aggfunc=self.aggfunc_name)
+        else:
+            return None
 
 
 class DailyDataProcess:
@@ -37,52 +57,53 @@ class DailyDataProcess:
             }
         ).set_index("fecha")
 
+
+class MonthlyReport:
+    _monthly_report_aggregator_columns = [
+        MonthlyReportColumn("prec", "Total Precipitation [mm]", "sum", "prec"),
+        MonthlyReportColumn(
+            "tmed", "Average of average daily temperature [C]", "mean", "tmed"
+        ),
+        MonthlyReportColumn(
+            "tmin_med", "Average minimum daily temperature [C]", "mean", "tmin"
+        ),
+        MonthlyReportColumn("tmin_min", "Minimum daily temperature [C]", "min", "tmin"),
+        MonthlyReportColumn(
+            "tmax_med", "Average of daily maximum temperature [C]", "mean", "tmax"
+        ),
+        MonthlyReportColumn("tmax_max", "Maximum daily temperature [C]", "max", "tmax"),
+        MonthlyReportColumn("velmedia", "Median wind speed [kph]", "mean", "velmedia"),
+    ]
+    _other_columns = [Column("prec_cumsum", "Accumulated Precipitation [mm]")]
+
+    @property
+    def columns(self):
+        return self._monthly_report_aggregator_columns + self._other_columns
+
+    def __init__(self, monthly_report_df: pd.DataFrame):
+        self.df = monthly_report_df
+
+    def __repr__(self) -> str:
+        return str(self.df)
+
     @classmethod
-    def monthly_report(cls, df: pd.DataFrame) -> pd.DataFrame:
-        # TODO: create a dataclass for columns
-        # @dataclass
-        # Column:
-        #   column.short_name
-        #   column.long_name
-        #   column.aggfunc
-        #   column.parent_column
-        #  
-        # prec = Column("prec", "Total Precipitation [mm]", "sum", "prec")
-        return (
-            df.groupby(df.index.month)
+    def create_from_daily_data(cls, df: pd.DataFrame) -> Self:
+        return cls(
+            df.resample("M")
             .agg(
-                prec=("prec", sum),
-                tmed=pd.NamedAgg(column="tmed", aggfunc="mean"),
-                tmin_med=pd.NamedAgg(column="tmin", aggfunc="mean"),
-                tmin_min=("tmin", min),
-                tmax_med=pd.NamedAgg(column="tmax", aggfunc="mean"),
-                tmax_max=("tmax", max),
-                velmedia_max=("velmedia", max),
+                **{
+                    col.short_name: col.aggfunc
+                    for col in cls._monthly_report_aggregator_columns
+                }
             )
             .assign(prec_cumsum=lambda df_: df_.prec.cumsum())
             .sort_index(axis=1)
         )
-        
-@dataclass
-class Column:
-    short_name: str
-    long_name: str
-    aggfunc_name: str
-    parent_column: str
-    
-    @property
-    def aggfunc(self):
-        if self.parent_column and self.aggfunc_name:
-            return pd.NamedAgg(column=self.parent_column, aggfunc=self.aggfunc_name)
-        else:
-            return None
-    
-monthly_report_columns = [
-    Column("prec", "Total Precipitation [mm]", "sum", "prec"),
-    Column("tmed", "Average of average daily temperature [C]", "mean", "tmed"),
-    Column("tmin_med", "Average minimum daily temperature [C]", "mean", "tmin"),
-    Column("tmin_min", "Minimum daily temperature [C]", "min", "tmin"),
-    Column("tmax_med", "Average of daily maximum temperature [C]", "mean", "tmax"),
-    Column("tmax_max", "Maximum daily temperature [C]", "max", "tmax"),
-    Column("velmedia", "Median wind speed [kph]", "mean", "velmedia")
-]
+
+    def rename_columns(self) -> Self:
+        return MonthlyReport(
+            self.df.rename(
+                columns={col.short_name: col.long_name for col in self.columns},
+                index=lambda s: s.month_name(),
+            ).rename_axis("Month")
+        )

@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 
-from metspa.postprocess import DailyDataProcess
+from metspa.postprocess import DailyDataProcess, MonthlyReport
 from metspa.queries import DailyDataRequest
 from metspa.utils import PACKAGE_DIRECTORY
 
@@ -20,8 +20,8 @@ json_data = DailyDataRequest(
 df = pd.read_json(json_data)
 df = DailyDataProcess.tweak_data(df)
 print(df.head())
-monthly_report = DailyDataProcess.monthly_report(df)
-print(monthly_report.head())
+monthly_report = MonthlyReport.create_from_daily_data(df)
+print(monthly_report)
 
 file_name = f"df_id{station_id}_s{start_date}_e{end_date}"
 
@@ -29,5 +29,5 @@ file_name = f"df_id{station_id}_s{start_date}_e{end_date}"
 outdir = PACKAGE_DIRECTORY / "output"
 df.reset_index().to_feather(outdir / f"daily_{file_name}.fea")
 
-monthly_report.reset_index().to_feather(outdir / f"monthly_{file_name}.fea")
+monthly_report.df.reset_index().to_feather(outdir / f"monthly_{file_name}.fea")
 print("end")
