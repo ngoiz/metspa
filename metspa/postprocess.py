@@ -1,6 +1,5 @@
 # Should replace processdata.py in the future
 from dataclasses import dataclass
-from typing import Self
 
 import pandas as pd
 
@@ -76,19 +75,14 @@ class MonthlyReport:
     ]
     _other_columns = [Column("prec_cumsum", "Accumulated Precipitation [mm]")]
 
+    @classmethod
     @property
-    def columns(self):
-        return self._monthly_report_aggregator_columns + self._other_columns
-
-    def __init__(self, monthly_report_df: pd.DataFrame):
-        self.df = monthly_report_df
-
-    def __repr__(self) -> str:
-        return str(self.df)
+    def columns(cls):
+        return cls._monthly_report_aggregator_columns + cls._other_columns
 
     @classmethod
-    def create_from_daily_data(cls, df: pd.DataFrame) -> Self:
-        return cls(
+    def create_from_daily_data(cls, df: pd.DataFrame) -> pd.DataFrame:
+        return (
             df.resample("M")
             .agg(
                 **{
@@ -100,10 +94,9 @@ class MonthlyReport:
             .sort_index(axis=1)
         )
 
-    def rename_columns(self) -> Self:
-        return MonthlyReport(
-            self.df.rename(
-                columns={col.short_name: col.long_name for col in self.columns},
-                index=lambda s: s.month_name(),
-            ).rename_axis("Month")
-        )
+    @classmethod
+    def rename_columns(cls, df) -> pd.DataFrame:
+        return df.rename(
+            columns={col.short_name: col.long_name for col in cls.columns},
+            index=lambda s: s.month_name(),
+        ).rename_axis("Month")

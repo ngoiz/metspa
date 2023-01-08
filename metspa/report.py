@@ -29,5 +29,5 @@ file_name = f"df_id{station_id}_s{start_date}_e{end_date}"
 outdir = PACKAGE_DIRECTORY / "output"
 df.reset_index().to_feather(outdir / f"daily_{file_name}.fea")
 
-monthly_report.df.reset_index().to_feather(outdir / f"monthly_{file_name}.fea")
+monthly_report.reset_index().to_feather(outdir / f"monthly_{file_name}.fea")
 print("end")

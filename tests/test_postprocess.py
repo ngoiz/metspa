@@ -40,7 +40,7 @@ def test_daily_numeric_column_processing(df: pd.DataFrame):
 def test_monthly_report(df):
     monthly_report = MonthlyReport.create_from_daily_data(df)
 
-    mr_formatted = monthly_report.rename_columns()
+    mr_formatted = MonthlyReport.rename_columns(monthly_report)
 
     assert len(monthly_report.columns) == len(
         mr_formatted.columns
